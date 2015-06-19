@@ -936,7 +936,9 @@ static int handle_setattr(struct fuse* fuse, struct fuse_handler* handler,
     if (!node) {
         return -ENOENT;
     }
-    if (!check_caller_access_to_node(fuse, hdr, node, W_OK, has_rw)) {
+
+    if (!(req->valid & FATTR_FH) &&
+            !check_caller_access_to_node(fuse, hdr, node, W_OK, has_rw)) {
         return -EACCES;
     }
 
@@ -1301,6 +1303,7 @@ static int handle_write(struct fuse* fuse, struct fuse_handler* handler,
         return -errno;
     }
     out.size = res;
+    out.padding = 0;
     fuse_reply(fuse, hdr->unique, &out, sizeof(out));
     return NO_STATUS;
 }
